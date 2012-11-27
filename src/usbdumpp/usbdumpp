@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+
+# Simple USB-UART data filter
+#
+# Example imput lines of interest:
+# READY:    ffff880044b31840 2389682032 C Bi:1:026:1 0 5 = 52454144 59
+# A0:       ffff88011ce4fd80 2390471685 S Bo:1:026:1 -115 1 = a0
+
+import re
+
+template = re.compile(r'(?P<URBTAG>\w+) (?P<TIMESTAMP>\w+) (?P<ETYPE>[CS]) (?P<URBTYPEDIR>[BCIZ][io]):\d+:\d+:\d+ (?P<STATUS>[\d-]+) (?P<DATALEN>\d+)( = (?P<DATA>[\w ]+))?$').match
+
+if __name__ == '__main__':
+
+    fd = open('dumps/6577-readback-0-400.log')
+
+    data_dir = None
+
+    for line in fd:
+
+        result = template(line)
+        if not result: continue
+        result = result.groupdict()
+
+        event = result['ETYPE'] + result['URBTYPEDIR']
+        length = int(result['DATALEN'])
+        status = int(result['STATUS'])
+        data = "".join((result.get('DATA') or "").split(' '))
+
+        if event == 'CBi':
+            direction = 'in'
+        elif event == 'SBo' and (status == -115):
+            direction = 'out'
+        else:
+            direction = None
+
+        if direction:
+            print '%s:\t%d\t%s' % (direction, length, data)
