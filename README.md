@@ -4,7 +4,8 @@ Utilities for devices based on MediaTek chipsets.
 
 ## What we have right now
 
-Now we have nothing except enthusiasm and reach experience in Linux world.
+* Detect connected device and read preloader version
+* Enthusiasm and reach experience in Linux world :)
 
 ## In progress
 
